@@ -1,0 +1,24 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+**"
+
+jobs:
+  Release:
+    runs-on: windows-2022
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Release
+        run: cargo build --release --verbose
+
+      - name: Create release
+        uses: ncipollo/release-action@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ github.ref_name }}
+          tag: ${{ github.ref_name }}
+          artifacts: ./target/release/malibu-bouncer.exe
+          allowUpdates: true
