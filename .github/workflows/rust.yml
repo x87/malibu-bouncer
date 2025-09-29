@@ -24,39 +24,19 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            binary_name: malibu-bouncer
-            asset_suffix: linux-x86_64
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            binary_name: malibu-bouncer.exe
-            asset_suffix: windows-x86_64.exe
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     
     steps:
     - uses: actions/checkout@v4
     - name: Build Release
       run: cargo build --release --verbose
-    - name: Verify Binary Exists (Linux)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Verify Binary Exists
       run: |
-        if [ ! -f ./target/release/${{ matrix.binary_name }} ]; then
-          echo "Error: Binary not found at ./target/release/${{ matrix.binary_name }}"
-          exit 1
-        fi
-        echo "Binary size: $(stat -c%s ./target/release/${{ matrix.binary_name }}) bytes"
-    - name: Verify Binary Exists (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        if (!(Test-Path "./target/release/${{ matrix.binary_name }}")) {
-          Write-Host "Error: Binary not found at ./target/release/${{ matrix.binary_name }}"
+        if (!(Test-Path "./target/release/malibu-bouncer.exe")) {
+          Write-Host "Error: Binary not found at ./target/release/malibu-bouncer.exe"
           exit 1
         }
-        $size = (Get-Item "./target/release/${{ matrix.binary_name }}").Length
+        $size = (Get-Item "./target/release/malibu-bouncer.exe").Length
         Write-Host "Binary size: $size bytes"
     - name: Create Release and Upload Asset
       env:
@@ -65,6 +45,6 @@ jobs:
         gh release create ${{ github.ref_name }} \
           --title "Release ${{ github.ref_name }}" \
           --notes "Automated release for ${{ github.ref_name }}" \
-          ./target/release/${{ matrix.binary_name }}#malibu-bouncer-${{ github.ref_name }}-${{ matrix.asset_suffix }} || \
+          ./target/release/malibu-bouncer.exe#malibu-bouncer-${{ github.ref_name }}-windows-x86_64.exe || \
         gh release upload ${{ github.ref_name }} \
-          ./target/release/${{ matrix.binary_name }}#malibu-bouncer-${{ github.ref_name }}-${{ matrix.asset_suffix }}
+          ./target/release/malibu-bouncer.exe#malibu-bouncer-${{ github.ref_name }}-windows-x86_64.exe
