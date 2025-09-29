@@ -8,11 +8,16 @@ fn main() {
         process::exit(1);
     };
 
-    let ini = Ini::load_from_file("fastman92limitAdjuster_GTASA.ini").unwrap();
+    let Ok(ini) = Ini::load_from_file("fastman92limitAdjuster_GTASA.ini") else {
+        eprintln!("Failed to read fastman92limitAdjuster_GTASA.ini");
+        process::exit(1);
+    };
+
     let limit = ini
         .section(Some("IDE LIMITS"))
         .and_then(|s| s.get("peds"))
         .unwrap_or("278");
+
     let limit: usize = limit.parse().unwrap_or(278);
 
     match gta_ide_parser::parse_file(&ide_data) {
@@ -27,6 +32,7 @@ fn main() {
                         );
                         process::exit(1);
                     }
+                    break;
                 }
             }
         }
